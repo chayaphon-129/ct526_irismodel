@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from iris_predict import predict_iris
 import numpy as np
+import psycopg2
 
 app = Flask(__name__)
 
@@ -18,8 +19,25 @@ def predict():
     petal_width = float(request.form['petal_width'])
     features = [sepal_length, sepal_width, petal_length, petal_width]
     prediction = predict_iris(features)
+
+
+    conn = psycopg2.connect(host='localhost', port='5432', user='postgres', password='MY@ym2562', database='iris')
+    cur = conn.cursor()
+    cur.execute('INSERT INTO allresult (sepal_length, sepal_width, petal_length, petal_width, prediction) values (%s, %s, %s, %s, %s)', (sepal_length, sepal_width, petal_length, petal_width, prediction))
+    conn.commit()
+    cur.close()
+    conn.close()
     return render_template('prediction.html', prediction=prediction)
 
+@app.route('/all_result', methods=['GET'])
+def all_result():
+    conn = psycopg2.connect(host='localhost', port='5432', user='postgres', password='MY@ym2562', database='iris')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM public.allresult")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('all_result.html', rows=rows)
 
 if __name__ == '__main__':
     app.run(debug=True)

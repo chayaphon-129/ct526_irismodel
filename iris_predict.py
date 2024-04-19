@@ -19,3 +19,4 @@ clf.fit(X, y)
 def predict_iris(features):
     predicted_iris_type = clf.predict([features])[0]
     return 'setosa' if predicted_iris_type == 0 else ('versicolor' if predicted_iris_type == 1 else 'virginica')
+
